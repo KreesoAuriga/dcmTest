@@ -17,9 +17,9 @@ namespace JobApplicationTracker.Server.Controllers
     public class DbController : Controller, IDbController
     {
         private AppDbContext _dbContext;
-        private ILogger _logger;
+        private ILogger<DbController> _logger;
 
-        public DbController(AppDbContext appDbContext, ILogger logger)
+        public DbController(AppDbContext appDbContext, ILogger<DbController> logger)
         {
             _dbContext = appDbContext;
             _logger = logger;
@@ -27,7 +27,13 @@ namespace JobApplicationTracker.Server.Controllers
 
         public async Task<bool> AddUserAsync(string email, string userName)
         {
-            var user = new User(userName, email);
+            var user = new User()
+            {
+                UserName = userName,
+                NormalizedUserName = userName.ToUpperInvariant(),
+                Email = email,
+                NormalizedEmail = email.ToUpperInvariant(),
+            };
 
             try
             {

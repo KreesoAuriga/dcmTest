@@ -1,3 +1,4 @@
+using JobApplicationTracker.Server.Controllers;
 using JobApplicationTracker.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +14,12 @@ builder.Services.AddSwaggerGen();
 // Add services to the container
 builder.Services.AddControllers();
 
+
 // Configure SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IDbController, DbController>();
 
 var app = builder.Build();
 

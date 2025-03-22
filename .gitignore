@@ -4,3 +4,5 @@
 /jobapplicationtracker.client/obj/
 *-lock.json
 **.bak
+/JobApplicationTracker.Server/jobAppTracker.db*
+/JobApplicationTracker.Server/Migrations/
