@@ -1,2 +1,6 @@
 /.vs/*
 /JobApplicationTracker.Server/obj/*
+/JobApplicationTracker.Server/bin/
+/jobapplicationtracker.client/obj/
+*-lock.json
+**.bak

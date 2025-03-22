@@ -4,17 +4,22 @@ using Microsoft.EntityFrameworkCore;
 namespace JobApplicationTracker.Server.Data
 {
     public interface IUser
-    {
-        string? Email { get; }
+    {        
+        string? NormalizedEmail { get; }
         string? UserName { get; }
         ICollection<IJobApplication> JobApplications { get; }
     }
 
+    [Index(nameof(NormalizedEmail), IsUnique = true)]
     public class User : IdentityUser, IUser
     {
-        internal JobApplication[] _jobApplications;
+        public ICollection<IJobApplication> JobApplications { get; set; }
 
-        public ICollection<IJobApplication> JobApplications => _jobApplications;
+        public User(string userName, string email) 
+        { 
+            UserName = userName;
+            Email = email;
+        }
     }
 
     /// <summary>
@@ -62,9 +67,10 @@ namespace JobApplicationTracker.Server.Data
 
     public interface IJobApplication
     {
-        string CompanyName { get; }
-        string Position { get; }
+        string CompanyName          { get; }
+        string Position             { get; }
         JobApplicationStatus Status { get; }
+        DateTime DateApplied        { get; }
     }
 
     internal class JobApplication : IJobApplication
@@ -72,12 +78,13 @@ namespace JobApplicationTracker.Server.Data
         public string CompanyName             { get; set; }
         public string Position                { get; set; }
         public JobApplicationStatus Status    { get; set; }
+        public DateTime DateApplied           { get; set; }
     }
 
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; } // Example model
+        public DbSet<User> Users { get; set; }
     }
 }
