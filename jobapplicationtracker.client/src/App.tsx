@@ -51,6 +51,25 @@ function App() {
     const [userEmail, setUserEmail] = useState("");
     const [userName, setUserName] = useState("");
     const [message, setMessage] = useState("");
+    const [jobApplications, setJobApplications] = useState([]);
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [editedJob, setEditedJob] = useState({
+        companyName: "",
+        position: "",
+        status: "",
+        dateApplied: "",
+    });
+    //const [newJobApplicationId, setNewJobApplicationId] = useState("");
+
+    const jobStatuses = [
+        "Created",
+        "Applied",
+        "RejectedByCompany",
+        "RejectedByApplicant",
+        "InterviewScheduled",
+        "InterviewedAndAwaitingResponse",
+        "OfferHasBeenMade"
+    ];
 
     const handleAddUser = async () => {
         const user: newUser = { email: userEmail, userName: userName };
@@ -69,6 +88,57 @@ function App() {
         }
     };
 
+    // Fetch job applications when userEmail is set
+    const handleGetJobApplications = async () => {
+        fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications`, { method: "GET" })
+            .then((res) => res.json())
+            .then((data) => setJobApplications(data))
+            .catch((err) => console.error("Error fetching job applications", err));
+    };
+
+    // Fetch job application details by ID
+    const fetchJobDetails = async (id) => {
+        fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/${id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                setSelectedJob(data);
+                setEditedJob({
+                    companyName: data.companyName,
+                    position: data.position,
+                    status: data.status,
+                    dateApplied: data.dateApplied,
+                });
+            })
+            .catch((err) => console.error("Error fetching job details", err));
+    };
+    const startNewJobApplication = async () => {
+        const emptyApplication: newJobApplication = {
+            companyName: "",
+            position: "",
+            dateApplied: new Date()
+        };
+
+        fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/Add`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emptyApplication),
+        })
+        .then((res) => res.json()) // Assuming the response is just the job ID
+        .then((data) => {
+            const newJobId = data; // The returned data is the job ID
+            console.log("New job application ID:", newJobId);
+
+            // After adding the job, fetch its details using the ID
+            fetchJobDetails(newJobId);
+        })
+        .catch((err) => console.error("Error adding job application", err));
+    };
+
+    // Handle changes in the editable job fields
+    const handleJobChange = (e) => {
+        setEditedJob({ ...editedJob, [e.target.name]: e.target.value });
+    };
+
     return (
         <div className="container">
             <h1>User Management</h1>
@@ -85,56 +155,68 @@ function App() {
                 onChange={(e) => setUserEmail(e.target.value)}
             />
             <button onClick={handleAddUser}>Add User</button>
+            <button onClick={handleAddUser}>Delete User</button>
+            <button onClick={handleGetJobApplications}>Get job applications</button>
+            <button onClick={startNewJobApplication}>Start new job application</button>
 
             {message && <p>{message}</p>}
+
+            {/* Job Applications List */}
+            {jobApplications.length > 0 && (
+                <div className="job-applications">
+                    <h2>Job Applications</h2>
+                    <ul>
+                        {jobApplications.map((job) => (
+                            <li key={job.id}>
+                                {job.companyName} - {job.position}
+                                <button onClick={() => fetchJobDetails(job.id)}>View</button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {/* Job Application Details Form */}
+            {selectedJob && (
+                <div className="job-details">
+                    <h2>Edit Job Application</h2>
+                    <label htmlFor="companyName">Company name:</label>
+                    <input
+                        type="text"
+                        name="companyName"
+                        value={editedJob.companyName}
+                        onChange={handleJobChange}
+                    />
+                    <br />
+                    <label htmlFor="position">Position title:</label>
+                    <input
+                        type="text"
+                        name="position"
+                        value={editedJob.position}
+                        onChange={handleJobChange}
+                    />
+                    <br />
+                    <label htmlFor="status">Status:</label>
+                    <select name="status" value={editedJob.status} onChange={handleJobChange}>
+                        {jobStatuses.map((status) => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
+                    </select>
+                    <br />
+                    <label htmlFor="dateApplied">Date applied:</label>
+                    <input
+                        type="date"
+                        name="dateApplied"
+                        value={editedJob.dateApplied}
+                        onChange={handleJobChange}
+                    />
+                </div>
+            )}
         </div>
     );
-    /*
-    const [forecasts, setForecasts] = useState<Forecast[]>();
     
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
-
-
-
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
-
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
-
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        const data = await response.json();
-        setForecasts(data);
-    }
-    */
 }
 
 export default App;

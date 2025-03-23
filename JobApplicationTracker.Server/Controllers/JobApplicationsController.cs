@@ -49,7 +49,7 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("Add")]
         public async Task<ActionResult> AddApplication(string userEmail, NewJobApplicationDto applicationDto)
         {
@@ -70,7 +70,7 @@ namespace JobApplicationTracker.Server.Controllers
             if (!saveSuccess)
                 throw new InvalidOperationException($"Unexpected failure saving changes to user:{user.Email}");
 
-            return Ok();
+            return Ok(newApplication.Id);
         }
 
 /*
