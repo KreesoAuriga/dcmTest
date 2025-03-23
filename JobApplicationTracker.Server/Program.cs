@@ -2,6 +2,7 @@ using JobApplicationTracker.Server.Controllers;
 using JobApplicationTracker.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,8 +17,12 @@ builder.Services.AddControllers();
 
 
 // Configure SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+var isTestEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing";
+if (!isTestEnvironment)
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 builder.Services.AddScoped<IDbController, DbController>();
 
@@ -42,3 +47,7 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+
+
+public partial class Program { }

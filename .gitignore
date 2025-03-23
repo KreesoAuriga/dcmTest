@@ -6,3 +6,5 @@
 **.bak
 /JobApplicationTracker.Server/jobAppTracker.db*
 /JobApplicationTracker.Server/Migrations/
+/ServerTests/bin/
+/ServerTests/obj/
