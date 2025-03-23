@@ -1,4 +1,5 @@
 ﻿using JobApplicationTracker.Server.Data;
+using System.Text.Json.Serialization;
 
 namespace JobApplicationTracker.Server.DTOs
 {
@@ -11,6 +12,8 @@ namespace JobApplicationTracker.Server.DTOs
         {
 
         }
+
+        [JsonConstructor]
 
         public NewUserDto() : this(null, null)
         {
@@ -28,6 +31,8 @@ namespace JobApplicationTracker.Server.DTOs
         {
 
         }
+
+        [JsonConstructor]
 
         public UserDto() : this(null, null, null)
         {

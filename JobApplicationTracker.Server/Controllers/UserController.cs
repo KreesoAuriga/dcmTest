@@ -19,7 +19,7 @@ namespace JobApplicationTracker.Server.Controllers
         }
 
         [HttpPut]
-        public async Task CreateUser(NewUserDto newUser)
+        public async Task CreateUser([FromBody]NewUserDto newUser)
         {
             await _dbController.AddUserAsync(newUser.Email, newUser.UserName);
         }

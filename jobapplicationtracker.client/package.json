@@ -26,5 +26,6 @@
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
     "@types/node": "^22.13.0"
-  }
+  },
+  "proxy": "https://localhost:5173"
 }

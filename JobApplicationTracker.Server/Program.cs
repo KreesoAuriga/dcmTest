@@ -6,6 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS service
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("https://localhost:5173")  // Allow React frontend
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+    );
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -29,6 +39,7 @@ builder.Services.AddScoped<IDbController, DbController>();
 
 var app = builder.Build();
 
+app.UseCors();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

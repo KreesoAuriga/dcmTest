@@ -73,12 +73,14 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok();
         }
 
-
-        /*
-                public IActionResult Index()
-                {
-                    return View();
-                }*/
+/*
+        public IActionResult Index()
+        {
+            return PhysicalFile(
+                Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build", "index.html"),
+                "text/html"
+            );
+        }*/
     }
 
 }
