@@ -1,18 +1,25 @@
-﻿namespace JobApplicationTracker.Server.Data
+﻿using JobApplicationTracker.Server.DTOs;
+using Microsoft.EntityFrameworkCore;
+
+namespace JobApplicationTracker.Server.Data
 {
     public interface IJobApplication
     {
-        string CompanyName { get; }
-        string Position { get; }
+        public ulong Id             { get; }
+        string CompanyName          { get; }
+        string Position             { get; }
         JobApplicationStatus Status { get; }
-        DateTime DateApplied { get; }
+        DateTime DateApplied        { get; }
     }
 
-    internal class JobApplication : IJobApplication
+    [Index(nameof(Id), IsUnique = true)]
+    public class JobApplication : IJobApplication
     {
-        public string CompanyName             { get; set; }
-        public string Position                { get; set; }
-        public JobApplicationStatus Status    { get; set; }
-        public DateTime DateApplied           { get; set; }
+        public ulong                Id              { get; set; }
+        public string               CompanyName     { get; set; }
+        public string               Position        { get; set; }
+        public JobApplicationStatus Status          { get; set; }
+        public DateTime             DateApplied     { get; set; }
+        
     }
 }

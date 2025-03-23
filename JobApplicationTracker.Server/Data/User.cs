@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace JobApplicationTracker.Server.Data
 {
@@ -15,9 +16,9 @@ namespace JobApplicationTracker.Server.Data
     [Index(nameof(NormalizedEmail), IsUnique = true)]
     public class User : IdentityUser, IUser
     {
-        internal HashSet<JobApplication> _jobApplications = new HashSet<JobApplication>();
+        public ICollection<JobApplication> JobApplications { get; set; } = new HashSet<JobApplication>();
 
-        public IReadOnlyCollection<IJobApplication> JobApplications => _jobApplications;
+        IReadOnlyCollection<IJobApplication> IUser.JobApplications => (HashSet<JobApplication>)JobApplications;
 
         public User() 
         {
@@ -34,7 +35,7 @@ namespace JobApplicationTracker.Server.Data
             if (jobApplication is not JobApplication asJobApplicationClass)
                 throw new ArgumentException($"{nameof(jobApplication)} is not an instance of {nameof(jobApplication)}");
 
-            _jobApplications.Add(asJobApplicationClass);
+            JobApplications.Add(asJobApplicationClass);
         }
     }
 }

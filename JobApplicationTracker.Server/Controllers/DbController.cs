@@ -6,12 +6,12 @@ namespace JobApplicationTracker.Server.Controllers
 {
     public interface IDbController
     {
-        Task<IUser?> GetUserByNameAsync(string username, bool caseSensitive);
         Task<IUser?> GetUserByEmailAsync(string email);
         Task<HashSet<IUser>> GetAllUsersAsync();
 
         Task<bool> AddUserAsync(string email, string userName);
         Task<bool> RemoveUserAsync(string email);
+        Task<bool> SaveChangesToUserAsync(IUser user);
     }
 
     public class DbController : Controller, IDbController
@@ -58,28 +58,14 @@ namespace JobApplicationTracker.Server.Controllers
         internal async Task<User?> GetUserByEmailAsync(string email)
         {
             var normalizedEmail = email.ToUpper();
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
+            var user = await _dbContext.Users
+                .Include(u => u.JobApplications)
+                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
             return user;
         }
 
 
-        public async Task<IUser?> GetUserByNameAsync(string username, bool caseSensitive)
-        {
-            if (caseSensitive)
-            {
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
-
-                return user;
-            }
-            else
-            {
-                var normalizedUserName = username.ToUpper();
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName);
-
-                return user;
-            }
-        }
 
         public async Task<bool> RemoveUserAsync(string email)
         {
@@ -92,6 +78,22 @@ namespace JobApplicationTracker.Server.Controllers
             await _dbContext.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<bool> SaveChangesToUserAsync(IUser user)
+        {
+            var userFromDb = await GetUserByEmailAsync(user.Email ?? "");
+            if (userFromDb is null)
+                throw new InvalidOperationException($"Cannot update user:{user.Email} when that user does not exist in the database.");
+
+            if (ReferenceEquals(user, userFromDb))
+            {
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+
+            throw new InvalidOperationException("Update user was given an instance of a user that is not the same instance acquired for modification");
+
         }
     }
 }
