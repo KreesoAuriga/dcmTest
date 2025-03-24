@@ -1,5 +1,6 @@
 ﻿using JobApplicationTracker.Server.Data;
 using Microsoft.AspNetCore.Builder;
+using System.Text.Json.Serialization;
 
 namespace JobApplicationTracker.Server.DTOs
 {
@@ -17,6 +18,7 @@ namespace JobApplicationTracker.Server.DTOs
         {
         }
 
+        [JsonConstructor]
         public NewJobApplicationDto() : this("", "", DateTime.Now)
         {
         }
@@ -37,5 +39,10 @@ namespace JobApplicationTracker.Server.DTOs
         {
         }
 
+
+        [JsonConstructor]
+        public JobApplicationDto() : this(0, "", "", JobApplicationStatus.Created, DateTime.Now)
+        {
+        }
     }
 }

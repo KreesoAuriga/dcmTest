@@ -6,10 +6,10 @@ namespace JobApplicationTracker.Server.Data
     public interface IJobApplication
     {
         public ulong Id             { get; }
-        string CompanyName          { get; }
-        string Position             { get; }
-        JobApplicationStatus Status { get; }
-        DateTime DateApplied        { get; }
+        string CompanyName          { get; set; }
+        string Position             { get; set; }
+        JobApplicationStatus Status { get; set; }
+        DateTime DateApplied        { get; set; }
     }
 
     [Index(nameof(Id), IsUnique = true)]

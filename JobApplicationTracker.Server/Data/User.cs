@@ -11,6 +11,7 @@ namespace JobApplicationTracker.Server.Data
         IReadOnlyCollection<IJobApplication> JobApplications { get; }
 
         void AddJobApplication(IJobApplication jobApplication);
+        void RemoveJobApplication(IJobApplication jobApplication);
     }
 
     [Index(nameof(NormalizedEmail), IsUnique = true)]
@@ -36,6 +37,14 @@ namespace JobApplicationTracker.Server.Data
                 throw new ArgumentException($"{nameof(jobApplication)} is not an instance of {nameof(jobApplication)}");
 
             JobApplications.Add(asJobApplicationClass);
+        }
+
+        public void RemoveJobApplication(IJobApplication jobApplication)
+        {
+            if (jobApplication is not JobApplication asJobApplicationClass)
+                throw new ArgumentException($"{nameof(jobApplication)} is not an instance of {nameof(jobApplication)}");
+
+            JobApplications.Remove(asJobApplicationClass);
         }
     }
 }

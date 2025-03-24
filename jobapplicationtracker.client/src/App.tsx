@@ -1,6 +1,6 @@
-import React from "react";
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
+import React from 'react';
 /*
 interface Forecast {
     date: string;
@@ -43,6 +43,15 @@ interface user extends newUser {
     jobApplications: jobApplication[];
 }
 
+/** Converts dates in the string value return by the server to an actual Date object **/
+function dateFromString(date: string) : Date {
+    return new Date(date.split("T")[0]);
+}
+
+/** Trims date strings from the server to the format needed here **/
+function trimDateString(date: string): string {
+    return date.split("T")[0];
+}
 
 
 
@@ -54,12 +63,12 @@ function App() {
     const [jobApplications, setJobApplications] = useState([]);
     const [selectedJob, setSelectedJob] = useState(null);
     const [editedJob, setEditedJob] = useState({
+        id: 0,
         companyName: "",
         position: "",
         status: "",
         dateApplied: "",
     });
-    //const [newJobApplicationId, setNewJobApplicationId] = useState("");
 
     const jobStatuses = [
         "Created",
@@ -70,6 +79,26 @@ function App() {
         "InterviewedAndAwaitingResponse",
         "OfferHasBeenMade"
     ];
+
+    // Load userEmail from sessionStorage when the component mounts
+    useEffect(() => {
+        const storedEmail = sessionStorage.getItem("userEmail");
+        if (storedEmail) {
+            setUserEmail(storedEmail); // Restore the stored value
+        }
+    }, []);
+
+    // Function to save userEmail to sessionStorage
+    const saveFormValues = () => {
+        sessionStorage.setItem("userEmail", userEmail);
+    };
+
+    // Invoke saveFormValues whenever userEmail changes
+    useEffect(() => {
+        if (userEmail) {
+            saveFormValues();
+        }
+    }, [userEmail]); // Depend on userEmail, so it runs when userEmail changes
 
     const handleAddUser = async () => {
         const user: newUser = { email: userEmail, userName: userName };
@@ -103,13 +132,33 @@ function App() {
             .then((data) => {
                 setSelectedJob(data);
                 setEditedJob({
+                    id: data.id,
                     companyName: data.companyName,
                     position: data.position,
                     status: data.status,
-                    dateApplied: data.dateApplied,
+                    dateApplied: trimDateString(data.dateApplied),
                 });
             })
             .catch((err) => console.error("Error fetching job details", err));
+    };
+
+    const deleteJob = async (id) => {
+        fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/Delete/${id}`, {
+            method: "DELETE",
+        })
+            .then((res) => {
+                if (res.ok) {
+                    setMessage("Application deleted");
+                    if (editedJob.id === id) {
+                        setSelectedJob(null);
+                    }
+                    handleGetJobApplications();//update the list
+                }
+                else {
+                    setMessage("Server error, please try again");
+                }
+            });
+
     };
     const startNewJobApplication = async () => {
         const emptyApplication: newJobApplication = {
@@ -137,6 +186,34 @@ function App() {
     // Handle changes in the editable job fields
     const handleJobChange = (e) => {
         setEditedJob({ ...editedJob, [e.target.name]: e.target.value });
+    };
+
+    const handleSaveChanges = () => {
+        const updatedApplication: jobApplication = {
+            id: editedJob.id,
+            companyName: editedJob.companyName,
+            position: editedJob.position,
+            status: jobApplicationStatus[editedJob.status],
+            dateApplied: dateFromString(editedJob.dateApplied)
+        };
+
+        fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/Update`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedApplication),
+        })
+            .then((res) => {
+                if (res.ok) {
+                    setMessage("changes saved");
+                }
+                else {
+                    setMessage("error saving changes");
+                }
+            })
+            .catch((err) => console.error("Error adding job application", err)).
+            then(() => {
+                handleGetJobApplications();
+            });
     };
 
     return (
@@ -167,53 +244,143 @@ function App() {
                     <h2>Job Applications</h2>
                     <ul>
                         {jobApplications.map((job) => (
-                            <li key={job.id}>
-                                {job.companyName} - {job.position}
-                                <button onClick={() => fetchJobDetails(job.id)}>View</button>
+                            <li key={job.id} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '8px 0',
+                                borderBottom: '1px solid #eee'
+                            }}>
+                                <div style={{ flex: '1' }}>
+                                    <span style={{ display: 'inline-block', width: '100px', textAlign: 'right', marginRight: '10px' }}>
+                                        <strong>Company:</strong>
+                                    </span>
+                                    {job.companyName}
+                                </div>
+
+                                <div style={{ flex: '1' }}>
+                                    <span style={{ display: 'inline-block', width: '100px', textAlign: 'right', marginRight: '10px' }}>
+                                        <strong>Position:</strong>
+                                    </span>
+                                    {job.position}
+                                </div>
+
+                                <div style={{ width: '120px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                    <button
+                                        onClick={() => fetchJobDetails(job.id)}
+                                        style={{
+                                            padding: '4px 8px',
+                                            backgroundColor: '#3B82F6',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px'
+                                        }}
+                                    >
+                                        View
+                                    </button>
+                                    <button
+                                        onClick={() => deleteJob(job.id)}
+                                        style={{
+                                            padding: '4px 8px',
+                                            backgroundColor: '#EF4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px'
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
 
-            {/* Job Application Details Form */}
-            {selectedJob && (
-                <div className="job-details">
-                    <h2>Edit Job Application</h2>
-                    <label htmlFor="companyName">Company name:</label>
-                    <input
-                        type="text"
-                        name="companyName"
-                        value={editedJob.companyName}
-                        onChange={handleJobChange}
-                    />
-                    <br />
-                    <label htmlFor="position">Position title:</label>
-                    <input
-                        type="text"
-                        name="position"
-                        value={editedJob.position}
-                        onChange={handleJobChange}
-                    />
-                    <br />
-                    <label htmlFor="status">Status:</label>
-                    <select name="status" value={editedJob.status} onChange={handleJobChange}>
-                        {jobStatuses.map((status) => (
-                            <option key={status} value={status}>
-                                {status}
-                            </option>
-                        ))}
-                    </select>
-                    <br />
-                    <label htmlFor="dateApplied">Date applied:</label>
-                    <input
-                        type="date"
-                        name="dateApplied"
-                        value={editedJob.dateApplied}
-                        onChange={handleJobChange}
-                    />
-                </div>
-            )}
+            <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md">
+                {/* Job Application Details Form */}
+                {selectedJob && (
+                    <div className="job-details">
+                        <h2>Edit Job Application</h2>
+
+                        {/* Form grid container */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 2fr',
+                            gap: '10px',
+                            alignItems: 'center'
+                        }}>
+                            {/* Job ID (read-only) */}
+                            <label htmlFor="jobId" style={{ textAlign: 'right' }}>Job ID:</label>
+                            <div style={{
+                                padding: '8px',
+                                backgroundColor: '#f3f4f6',
+                                borderRadius: '4px',
+                                border: '1px solid #d1d5db'
+                            }}>
+                                {editedJob.id || ""} {/* Use the actual job ID here */}
+                            </div>
+
+                            <label htmlFor="companyName" style={{ textAlign: 'right' }}>Company name:</label>
+                            <input
+                                type="text"
+                                name="companyName"
+                                value={editedJob.companyName}
+                                onChange={handleJobChange}
+                            />
+
+                            <label htmlFor="position" style={{ textAlign: 'right' }}>Position title:</label>
+                            <input
+                                type="text"
+                                name="position"
+                                value={editedJob.position}
+                                onChange={handleJobChange}
+                            />
+
+                            <label htmlFor="status" style={{ textAlign: 'right' }}>Status:</label>
+                            <select name="status" value={editedJob.status} onChange={handleJobChange}>
+                                {jobStatuses.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <label htmlFor="dateApplied" style={{ textAlign: 'right' }}>Date applied:</label>
+                            <input
+                                type="date"
+                                name="dateApplied"
+                                value={editedJob.dateApplied}
+                                onChange={handleJobChange}
+                            />
+                        </div>
+
+
+                        {/* Save Changes button - placed outside the grid but inside the job-details div */}
+                        <div style={{
+                            marginTop: '20px',
+                            display: 'flex',
+                            justifyContent: 'flex-end'
+                        }}>
+                            <button
+                                style={{
+                                    backgroundColor: '#3B82F6', // blue color
+                                    color: 'white',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    border: 'none',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={handleSaveChanges}
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+
+                    </div>
+
+                )}
+            </div>
         </div>
     );
     

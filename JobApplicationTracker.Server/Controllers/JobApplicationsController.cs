@@ -29,8 +29,8 @@ namespace JobApplicationTracker.Server.Controllers
 
             var jobApplications = user.JobApplications.Select(a => new JobApplicationDto(a)).ToArray();
 
-            var result = new JobApplicationsListDto(userEmail, jobApplications);
-            return Ok(result);
+            //var result = new JobApplicationsListDto(userEmail, jobApplications);
+            return Ok(jobApplications);
         }
 
         [HttpGet]
@@ -73,14 +73,64 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(newApplication.Id);
         }
 
-/*
-        public IActionResult Index()
+        [HttpPost]
+        [Route("Update")]
+        public async Task<ActionResult> UpdateApplication(string userEmail, JobApplicationDto applicationDto)
         {
-            return PhysicalFile(
-                Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build", "index.html"),
-                "text/html"
-            );
-        }*/
+            var user = await _dbController.GetUserByEmailAsync(userEmail);
+            if (user is null)
+                return BadRequest("The specified user was not found");
+            
+            var application = user.JobApplications.FirstOrDefault(j => j.Id == applicationDto.Id);
+            if (application is null)
+                return NotFound();
+
+            application.CompanyName = applicationDto.CompanyName;
+            application.Position = applicationDto.Position;
+            application.Status = applicationDto.Status;
+            application.DateApplied = applicationDto.DateApplied;
+            
+            var saveSuccess = await _dbController.SaveChangesToUserAsync(user);
+            if (!saveSuccess)
+                throw new InvalidOperationException($"Unexpected failure saving changes to user:{user.Email}");
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Delete's the application for the specified id.
+        /// </summary>
+        /// <returns>Ok on success. NotFound if the userEmail is not found. </returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        [HttpDelete]
+        [Route("Delete/{id}")]
+        public async Task<ActionResult> DeleteApplication(string userEmail, ulong id)
+        {
+            var user = await _dbController.GetUserByEmailAsync(userEmail);
+            if (user is null)
+                return BadRequest("The specified user was not found");
+
+            var application = user.JobApplications.FirstOrDefault(j => j.Id == id);
+            if (application is null)
+                return NotFound();
+
+            user.RemoveJobApplication(application);
+
+            var saveSuccess = await _dbController.SaveChangesToUserAsync(user);
+            if (!saveSuccess)
+                throw new InvalidOperationException($"Unexpected failure saving changes to user:{user.Email}");
+
+            return Ok();
+        }
+
+        /*
+                public IActionResult Index()
+                {
+                    return PhysicalFile(
+                        Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build", "index.html"),
+                        "text/html"
+                    );
+                }*/
     }
 
 }
