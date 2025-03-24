@@ -18,12 +18,22 @@ namespace JobApplicationTracker.Server.Controllers
             _dbController = dbController;
         }
 
+        /// <summary>
+        /// Creates a new user.
+        /// </summary>
+        /// <param name="newUser"></param>
+        /// <returns></returns>
         [HttpPut]
         public async Task CreateUser([FromBody]NewUserDto newUser)
         {
             await _dbController.AddUserAsync(newUser.Email, newUser.UserName);
         }
 
+        /// <summary>
+        /// Gets the specified user info.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult> GetUser(string email)
         {
@@ -34,6 +44,10 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(new UserDto(user));
         }
 
+        /// <summary>
+        /// Gets a list of all users.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("AllUsers")]
         public async Task<ActionResult> GetAllUsers()
         {
@@ -43,6 +57,11 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(userDtos);
         }
 
+        /// <summary>
+        /// Permanently deletes the specified user.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<ActionResult> DeleteUser(string email)
         {

@@ -20,6 +20,11 @@ namespace JobApplicationTracker.Server.Controllers
             _dbController = dbController;
         }
 
+        /// <summary>
+        /// Gets all job applications for the specified user.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult> GetAllApplications(string userEmail)
         {
@@ -33,6 +38,12 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(jobApplications);
         }
 
+        /// <summary>
+        /// Gets the application with the specified job id for the specified user.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetApplication(string userEmail, ulong id)
@@ -49,6 +60,13 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Adds a new job application for the specified user.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="applicationDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         [HttpPut]
         [Route("Add")]
         public async Task<ActionResult> AddApplication(string userEmail, NewJobApplicationDto applicationDto)
@@ -73,6 +91,13 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok(newApplication.Id);
         }
 
+        /// <summary>
+        /// Updates the provided job application.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="applicationDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">The changes failed to save.</exception>
         [HttpPost]
         [Route("Update")]
         public async Task<ActionResult> UpdateApplication(string userEmail, JobApplicationDto applicationDto)
@@ -123,14 +148,6 @@ namespace JobApplicationTracker.Server.Controllers
             return Ok();
         }
 
-        /*
-                public IActionResult Index()
-                {
-                    return PhysicalFile(
-                        Path.Combine(Directory.GetCurrentDirectory(), "ClientApp", "build", "index.html"),
-                        "text/html"
-                    );
-                }*/
     }
 
 }

@@ -4,6 +4,11 @@ using System.Collections.Generic;
 
 namespace JobApplicationTracker.Server.Data
 {
+
+
+    /// <summary>
+    /// Interface for a user.
+    /// </summary>
     public interface IUser
     {
         string? Email { get; }
@@ -24,6 +29,7 @@ namespace JobApplicationTracker.Server.Data
         public User() 
         {
         }
+
         public void AddJobApplication(IJobApplication jobApplication)
         {
             if (jobApplication is not JobApplication asJobApplicationClass)
