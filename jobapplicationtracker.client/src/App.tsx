@@ -14,13 +14,13 @@ const API_BASE_URL = window.location.protocol === "https:"
     : "http://localhost:5014";   // Use HTTP otherwise
 
 enum jobApplicationStatus {
-    Created,
-    Applied,
-    RejectedByCompany,
-    RejectedByApplicant,
-    InterviewScheduled,
-    InterviewedAndAwaitingResponse,
-    OfferHasBeenMade,
+    Created = 0,
+    Applied = 1,
+    RejectedByCompany = 2,
+    RejectedByApplicant = 3,
+    InterviewScheduled = 4,
+    InterviewedAndAwaitingResponse = 5,
+    OfferHasBeenMade = 6,
 }
 
 interface newJobApplication {
@@ -100,7 +100,25 @@ function App() {
         }
     }, [userEmail]); // Depend on userEmail, so it runs when userEmail changes
 
+    const isValidEmail = (email: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
+    // check email for validity with popup if not valid
+    const ensureValidEmail = (email: string): boolean => {
+        if (!isValidEmail(email)) {
+            alert("Please enter a valid email before proceeding!");
+            return false; 
+        }
+        return true; 
+    };
+
     const handleAddUser = async () => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
+
         const user: newUser = { email: userEmail, userName: userName };
 
 
@@ -119,6 +137,11 @@ function App() {
 
     // Fetch job applications when userEmail is set
     const handleGetJobApplications = async () => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
+
         fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications`, { method: "GET" })
             .then((res) => res.json())
             .then((data) => setJobApplications(data))
@@ -127,6 +150,11 @@ function App() {
 
     // Fetch job application details by ID
     const fetchJobDetails = async (id) => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
+
         fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/${id}`)
             .then((res) => res.json())
             .then((data) => {
@@ -143,6 +171,11 @@ function App() {
     };
 
     const deleteJob = async (id) => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
+
         fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/Delete/${id}`, {
             method: "DELETE",
         })
@@ -161,6 +194,11 @@ function App() {
 
     };
     const startNewJobApplication = async () => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
+
         const emptyApplication: newJobApplication = {
             companyName: "",
             position: "",
@@ -189,6 +227,10 @@ function App() {
     };
 
     const handleSaveChanges = () => {
+
+        if (!ensureValidEmail(userEmail)) {
+            return;
+        }
         const updatedApplication: jobApplication = {
             id: editedJob.id,
             companyName: editedJob.companyName,
@@ -196,6 +238,8 @@ function App() {
             status: jobApplicationStatus[editedJob.status],
             dateApplied: dateFromString(editedJob.dateApplied)
         };
+
+        const dbg = JSON.stringify(updatedApplication);
 
         fetch(`${API_BASE_URL}/api/${userEmail}/JobApplications/Update`, {
             method: "POST",
@@ -219,12 +263,6 @@ function App() {
     return (
         <div className="container">
             <h1>User Management</h1>
-            <input
-                type="text"
-                placeholder="Enter user name"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-            />
             <input
                 type="text"
                 placeholder="Enter user email"
@@ -310,17 +348,6 @@ function App() {
                             gap: '10px',
                             alignItems: 'center'
                         }}>
-                            {/* Job ID (read-only) */}
-                            <label htmlFor="jobId" style={{ textAlign: 'right' }}>Job ID:</label>
-                            <div style={{
-                                padding: '8px',
-                                backgroundColor: '#f3f4f6',
-                                borderRadius: '4px',
-                                border: '1px solid #d1d5db'
-                            }}>
-                                {editedJob.id || ""} {/* Use the actual job ID here */}
-                            </div>
-
                             <label htmlFor="companyName" style={{ textAlign: 'right' }}>Company name:</label>
                             <input
                                 type="text"

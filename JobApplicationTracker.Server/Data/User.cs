@@ -24,13 +24,6 @@ namespace JobApplicationTracker.Server.Data
         public User() 
         {
         }
-/*
-        public void Initialize(string userName, string email)
-        {
-            UserName = userName;
-            Email = email;
-        }*/
-
         public void AddJobApplication(IJobApplication jobApplication)
         {
             if (jobApplication is not JobApplication asJobApplicationClass)
