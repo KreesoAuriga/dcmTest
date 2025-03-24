@@ -18,3 +18,5 @@ notes:
 - Uses SQLite as the databse. The test project uses an in-memory database for testing purposes.
 
 - In the interest of time, full xml summaries of classes exist for only some of the key components. Final implementation would make lack of method/class summaries a warning as error on build.
+
+- The code App.tsx should be refactored for better organization and maintainability, rather than it's current state of being all in a single file.
