@@ -1,8 +1,20 @@
 Programming test for a software developer position.
 
-Scenario
+
+<h1>Scenario</h1>h1>
 You need to build a Job Application Tracker where users can add, update, and view job applications they have submitted. The system should keep track of jobs applied for, status updates, and the date applied.
 
+Requirements:
+ASP.net core web API
+EFCore with in-memory db or SQLite
+Repository pattern and dependency injection
+Bonus: use SwaggerUI
+Frontend: React or Angular allows for viewing all applicaitons, adding a new application, editing an existing application.
+Application consists of Company Name, Position, Status, Date Applied
+use of async/await
+
+
+<h1>Notes on solution:</h1>
 Authored in Visual Studio 2022 in Windows 10, as a cross platform ASP.NET core project, using EntityFramework for database interaction, and React for the front-end.
 
 The initial database can be created before first run via these commands from the JobApplication.Server project folder.
