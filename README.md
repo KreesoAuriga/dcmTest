@@ -1,7 +1,7 @@
 Programming test for a software developer position.
 
 
-<h1>Scenario</h1>h1>
+<h1>Scenario</h1>
 You need to build a Job Application Tracker where users can add, update, and view job applications they have submitted. The system should keep track of jobs applied for, status updates, and the date applied.
 
 Requirements:
